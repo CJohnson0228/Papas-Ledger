@@ -10,6 +10,8 @@
 
 # production
 /build
+/dist
+/plreduxelecledger_v2-win32-x64
 
 # misc
 .DS_Store
