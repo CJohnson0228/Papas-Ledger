@@ -1,5 +1,6 @@
 import React from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { updateFromBackup } from '../redux/accountsSlice';
 // Material UI v5 Component imports
 import { styled } from '@mui/material/styles';
 import Divider from '@mui/material/Divider';
@@ -18,9 +19,14 @@ import { useTheme } from '@mui/styles';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
+import BookIcon from '@mui/icons-material/Book';
 // Custom Function & Component imports
+const { ipcRenderer } = window.require('electron');
 
 function MenuBar(props) {
+  const dispatch = useDispatch();
   const accounts = useSelector((state) => state.accounts)
   const theme = useTheme();
   
@@ -35,6 +41,28 @@ function MenuBar(props) {
     },
   }));
 
+  const saveFile = () => {
+    ipcRenderer.send('saveFile', accounts)
+    ipcRenderer.on('savereply', (event, arg) => {
+      console.log("reply recieved", arg)
+      alert("File Saved")
+    })
+  }
+  
+  const loadFile = () => {
+    ipcRenderer.send('loadFile')
+    ipcRenderer.on('error', (event, arg) => {
+      console.log('error' + arg);
+      return
+    })
+    ipcRenderer.on('fileData', (event, arg) => {
+      let newState = JSON.parse(arg)
+      alert("Backup Loaded")
+      dispatch(updateFromBackup(newState))
+      return
+    })
+
+  }
   
     
   return <>
@@ -133,7 +161,6 @@ function MenuBar(props) {
               <ListItem button
                 onClick={() => props.handleAddAccountOpen()}
                 sx={{
-                  paddingLeft: (theme) => theme.spacing(6),
                   marginTop: '10px',
                   borderRadius: '10px',
                   [`&:hover`]: {
@@ -151,11 +178,80 @@ function MenuBar(props) {
                 <ListItemText 
                   primary='Add New Account' 
                   sx={{ color: theme.palette.secondary.light }} />
-                <ListItemIcon >
+                <ListItemIcon sx={{ justifyContent: 'flex-end' }}>
                   <AddCircleIcon 
                     sx={{ color: theme.palette.secondary.light }} />
                   </ListItemIcon>
               </ListItem>
+              <ListItem 
+                sx={{ 
+                  paddingLeft: (theme) => theme.spacing(6),
+                  marginTop: (theme) => theme.spacing(4) }}>
+                <ListItemIcon 
+                  sx={{ color: "#CCC" }}>
+                    <BookIcon />
+                </ListItemIcon>
+                <ListItemText primary="File Operations" />
+              </ListItem>
+              <Divider 
+                sx={{ 
+                  backgroundColor: "#CCC" }} />
+              {/* ================= Save Backup ========================= */}
+              <ListItem button
+                onClick={() => saveFile()}
+                sx={{
+                  marginTop: '10px',
+                  borderRadius: '10px',
+                  [`&:hover`]: {
+                    backgroundColor: "#8FBAE0",
+                    [`& .MuiListItemText-root`]: {
+                      color: '#222222',
+                    },
+                    [`& .MuiListItemIcon-root`]: {
+                      [`& .MuiSvgIcon-root`]: {
+                        color: '#222222',
+                      }
+                    },
+                  }
+                }}>
+                <ListItemText 
+                  primary='Save Ledger Backup' 
+                  sx={{ color: "#8FBAE0" }} />
+                <ListItemIcon sx={{ justifyContent: 'flex-end' }}>
+                  <DownloadIcon 
+                    sx={{ color: "#8FBAE0" }} />
+                </ListItemIcon>
+              </ListItem>
+              {/* ================= Load Backup ========================= */}
+              <ListItem button
+                onClick={() => loadFile()}
+                sx={{
+                  marginTop: '10px',
+                  borderRadius: '10px',
+                  [`&:hover`]: {
+                    backgroundColor: "#E7BF73",
+                    [`& .MuiListItemText-root`]: {
+                      color: '#222222',
+                    },
+                    [`& .MuiListItemIcon-root`]: {
+                      [`& .MuiSvgIcon-root`]: {
+                        color: '#222222',
+                      }
+                    },
+                  }
+                }}>
+                <ListItemText 
+                  primary='Load Ledger Backup' 
+                  sx={{ color: "#E7BF73" }} />
+                <ListItemIcon sx={{ justifyContent: 'flex-end' }}>
+                  <FileUploadIcon 
+                    sx={{ color: "#E7BF73" }} />
+                  </ListItemIcon>
+              </ListItem>
+              <Divider 
+                sx={{ 
+                  marginTop: '10px',
+                  backgroundColor: "#CCC" }} />
             </List>
           </Toolbar>
         </Drawer>

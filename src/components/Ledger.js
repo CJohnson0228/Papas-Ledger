@@ -34,6 +34,7 @@ import {
   reconcileItem } from '../redux/accountsSlice';
 
 function Ledger(props) {
+  const accounts = useSelector((state) => state.accounts);
   const account = useSelector((state) => state.accounts[props.accountSelect]);
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -58,7 +59,7 @@ function Ledger(props) {
 
   useEffect(() => {
     setYears(generateYearTabData(account))
-  }, [props.accountSelect])
+  }, [ props.accountSelect, accounts ])
 
   useEffect(() => {
     setMonths(generateMonthTabData(currentYear, years, account))

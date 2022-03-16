@@ -1,5 +1,5 @@
 {
-  "name": "plreduxelecledger_v2",
+  "name": "papasledger",
   "version": "0.1.0",
   "private": true,
   "author": {
@@ -51,7 +51,7 @@
     "eject": "react-scripts eject",
     "electron-dev": "concurrently \"SET BROWSER=none&&npm run start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:package:mac": "npm run build && electron-packager -m -c.extraMetadata.main=build/electron.js",
-    "electron:package:win": "npm run build && electron-packager -w -c.extraMetadata.main=build/electron.js",
+    "electron:package:win": "npm run build && electron-packager ./ -w -c.extraMetadata.main=build/electron.js",
     "electron:package:linux": "npm run build && electron-packager -l -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {

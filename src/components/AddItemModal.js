@@ -77,6 +77,7 @@ function AddItemModal(props) {
     let entryItem = handleBuildLedgerItem(date, choice, category, payee, amount, chkNum, props.selectedAccount)
     dispatch(addEntry(entryItem))
     setSelectedAmount(0)
+    setCheckNum()
     setSelectedPayee(" ")
     setCategorySelect(categories[0])
     handleDateChange(new Date().getTime())

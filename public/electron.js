@@ -1,6 +1,11 @@
-const { app, BrowserWindow, protocol } = require("electron");
+const { app, BrowserWindow, protocol, ipcMain, dialog } = require("electron");
+const electron = require ('electron');
 const path = require("path");
-const url = require("url");
+const fs = require("fs");
+
+// ipcMain functions
+const userDataPath = (electron.app || electron.remote.app).getPath('userData');
+
 
 // Create the native browser window.
 function createWindow() {
@@ -11,8 +16,13 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     },
   });
+
+  // removes the file menu
+  // mainWindow.removeMenu();
+  // removes the file menu
 
   // In production, set the initial browser path to the local bundle generated
   // by the Create React App build process.
@@ -58,6 +68,43 @@ app.whenReady().then(() => {
     }
   });
 });
+
+/// IPC Main Functions
+ipcMain.on('saveFile', (event,arg) => {
+  let date = new Date();
+  let month = (date.getMonth() + 1).toString();
+  let day = date.getDate().toString();
+  let year = date.getFullYear().toString();
+  let hour = date.getHours().toString();
+  let min = date.getMinutes();
+  min = min <= 9 ? '0' + min : min;
+  let saveDate = month + day + year + "-" + hour + min;
+  this.path = path.join(userDataPath, 'papasledgerBackup' + saveDate + '.json' )
+  let info = [ this.path, arg ]
+  fs.writeFileSync(this.path, JSON.stringify(arg));
+  event.reply('savereply', info)
+})
+
+ipcMain.on('loadFile', (event, arg) => {
+  let options = {
+    title: 'Select Backup File',
+    defaultPath: userDataPath,
+    buttonLabel: 'Load Backup',
+    filters: [
+      {names: 'Backups', extensions: [ 'json' ]},
+      {names: 'All Files', extensions: [ '*' ]}
+    ],
+    properties: [ 'openFile' ]
+  }
+  let filePath = dialog.showOpenDialogSync(options)
+  event.reply('path', filePath)
+  if(filePath === undefined){
+      event.reply('error', 'No File Selected')
+    } else {
+      let data = fs.readFileSync(filePath[0], 'utf-8')
+      event.reply('fileData', data)
+    }
+  })
 
 // Quit when all windows are closed, except on macOS.
 // There, it's common for applications and their menu bar to stay active until

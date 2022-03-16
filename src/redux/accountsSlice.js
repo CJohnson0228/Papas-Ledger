@@ -75,6 +75,12 @@ export const accountsSlice = createSlice({
         var dateB = new Date(jsonDateB).getTime()
         return dateA > dateB ? 1 : -1
       })
+    },
+    updateFromBackup(state, action) {
+      state.splice(0);
+      for (let i = 0; i < action.payload.length; i++) {
+        state.push(action.payload[i])
+      }
     }
   }
 })
@@ -89,5 +95,6 @@ export const { updateCurrentBalance } = accountsSlice.actions
 export const { reconcileItem } = accountsSlice.actions
 export const { addRegisterNote } = accountsSlice.actions
 export const { deleteRegisterNote } = accountsSlice.actions
+export const { updateFromBackup } = accountsSlice.actions
 
 export default accountsSlice.reducer;

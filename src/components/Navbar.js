@@ -22,13 +22,20 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import { currencyFormat } from '../utils/coreFunctions';
 
 function Navbar(props) {
-  const accounts = useSelector((state) => state.accounts)
-  const [ account, setAccount ] = useState(accounts[props.selectedAccount]);
+  const accounts = useSelector((state) => state.accounts);
+  const [ account, setAccount ] = useState();
+  const [ currentBalance, setCurrentBalance ] = useState(0);
   const theme = useTheme();
   
   useEffect(() => {
-    setAccount(accounts[props.selectedAccount])
-  }, [props.selectedAccount])
+    if (props.selectedAccount === undefined) {
+      setAccount()
+      setCurrentBalance(0)
+    } else {
+      setAccount(accounts[props.selectedAccount])
+      setCurrentBalance(accounts[props.selectedAccount].currentBalance)
+    }
+  }, [props.selectedAccount, accounts])
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -63,21 +70,30 @@ function Navbar(props) {
                         color: theme.palette.ledger.banksecond, 
                         fontSize: '1.2rem', 
                         ml: 2 }}>
-                          {account.name}
+                          {account.name}: 
                     </Typography>
-                      {(props.selectedAccount !== undefined)
-                        ? <IconButton
-                            size="large"
-                            onClick={props.handleNotesModalOpen}
-                            color='yellow'
-                            aria-label='notes'
-                            sx={{ ml: 2, border: '1px solid', padding: 1 }}>
-                                <Tooltip title="Register Notes">
-                                  <DescriptionIcon />
-                                </Tooltip>
-                          </IconButton>
-                        : <></>
-                      }
+                    {(currentBalance > 0)
+                      ? <Typography
+                          variant='body2'
+                          component='div'
+                          align='left'
+                          sx={{
+                            color: theme.palette.ledger.banksecond,
+                            fontSize: '1.2rem',
+                            ml: 3 }}>
+                              {currencyFormat(currentBalance)}
+                        </Typography>
+                      : <Typography
+                          variant='body2'
+                          component='div'
+                          align='right'
+                          sx={{
+                            color: theme.palette.error.light,
+                            fontSize: '1.2rem',
+                            mr: 2 }}>
+                              {currencyFormat(accounts[props.selectedAccount].currentBalance)}
+                        </Typography>
+                    } 
                   </Box>
                   <Typography
                     variant='h7'
@@ -86,30 +102,21 @@ function Navbar(props) {
                     sx={{ flexGrow: 1 }}>
                       Papa's Ledger
                   </Typography>
-                  {(accounts[props.selectedAccount].currentBalance > 0)
-                    ? <Typography
-                        variant='body2'
-                        component='div'
-                        align='right'
-                        sx={{
-                          color: theme.palette.ledger.banksecond,
-                          fontSize: '1.2rem',
-                          mr: 3,
-                          width: '300px' }}>
-                            {currencyFormat(accounts[props.selectedAccount].currentBalance)}
-                      </Typography>
-                    : <Typography
-                        variant='body2'
-                        component='div'
-                        align='right'
-                        sx={{
-                          color: theme.palette.error.light,
-                          fontSize: '1.2rem',
-                          mr: 2,
-                          width: '300px' }}>
-                            {currencyFormat(accounts[props.selectedAccount].currentBalance)}
-                      </Typography>
-                  }
+                  <Box sx={{ width: '300px', display: 'flex', justifyContent: "flex-end" }}>
+                    {(props.selectedAccount !== undefined)
+                      ? <IconButton
+                          size="large"
+                          onClick={props.handleNotesModalOpen}
+                          color='yellow'
+                          aria-label='notes'
+                          sx={{ mr: 2, border: '1px solid', padding: 1 }}>
+                              <Tooltip title="Register Notes">
+                                <DescriptionIcon />
+                              </Tooltip>
+                        </IconButton>
+                      : <></>
+                    }
+                  </Box>
                 </Grid>
               : <Typography
                   variant='h7'
@@ -119,6 +126,7 @@ function Navbar(props) {
                     Papa's Ledger
                 </Typography>
             }
+            
             {(props.selectedAccount !== undefined)
               ? <IconButton
                   size='large'

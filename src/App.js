@@ -19,13 +19,14 @@ import AdapterLuxon from '@mui/lab/AdapterLuxon';
 
 
 function App() {
-  const accounts = useSelector((state) => state.accounts)
+  const accounts = useSelector((state) => state.accounts);
   const [selectedAccount, setSelectedAccount] = useState();
+  const [ currentBalance, setCurrentBalance] = useState();
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (accounts[selectedAccount] === undefined) {
-      setSelectedAccount();
+    if (selectedAccount === undefined) {
+      setCurrentBalance(0);
     }
   }, [accounts])
 
@@ -83,15 +84,17 @@ function App() {
   const [ deleteAccountOpen, setDeleteAccountOpen ] = useState(false);
   const [ deleteAccount, setDeleteAccount ] = useState();
   const handleDeleteAccountOpen = (acct) => {
+    setSelectedAccount();
     setDeleteAccount(acct);
     setDeleteAccountOpen(true);}
   const handleDeleteAccountClose = () => setDeleteAccountOpen(false);
   
   function DeleteThisAccount() {
     dispatch(removeAccount(deleteAccount.id))
-    setSelectedAccount(undefined)
+    setSelectedAccount()
     handleDeleteAccountClose()
     setMenuBarOpen(false)
+    return
   }
 
   // MenuBar state
@@ -106,6 +109,7 @@ function App() {
         <Navbar
           menuBarOpen={toggleMenubar}
           selectedAccount={selectedAccount}
+          currentBalance={currentBalance}
           handleAddItemOpen={handleAddItemOpen}
           handleNotesModalOpen={handleNotesModalOpen}
           handleXmasModalOpen={handleXmasModalOpen} />
